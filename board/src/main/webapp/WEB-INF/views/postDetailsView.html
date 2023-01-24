@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<head>
+    <title>MyBatisBoard</title>
+    <style>
+        #buttonHome {
+            display: block;
+            margin-left: 250px;
+        }
+    </style>
+</head>
+<body>
+
+<h2 style="margin-left: 40%">글 상세 내역</h2>
+
+<div th:if="${loginUser != null}" style="margin-bottom: 15px">
+    <span th:if="${post.writer.id == loginUser.id} or ${#strings.equals(loginUser.usertype, 'admin')}"
+          style="margin-left: 60%">
+        <a th:href="@{/post/delete(id=${post.id})}"> <button>삭제</button></a>
+        <a th:href="@{/post/edit(id=${post.id})}"> <button>수정</button></a><br/>
+    </span>
+</div>
+
+
+<div style="margin-left: 26%">
+    <table class="tb tb_row" style="width: 800px">
+        <colgroup>
+            <col style="width:auto;"/>
+        </colgroup>
+        <tbody>
+        <tr>
+            <th scope="row">번호</th>
+            <td colspan="2">[[ ${post.id} ]]</td>
+
+            <th scope="row">제목</th>
+            <td colspan="2">[[ ${post.title} ]]</td>
+        </tr>
+        <tr>
+            <th scope="row">작성자</th>
+            <td colspan="2">[[ ${post.writer.username} ]]</td>
+            <th scope="row">작성일시</th>
+            <td colspan="2">[[ ${#dates.format(post.created_at, 'yyyy-MM-dd HH:mm:ss')} ]]</td>
+
+        </tr>
+        <tr th:if="not ${post.modifier == null}">
+            <th scope="row">수정자</th>
+            <td colspan="2">[[ ${post.modifier.username} ]]</td>
+            <th scope="row">수정일시</th>
+            <td colspan="2">[[ ${#dates.format(post.modified_at, 'yyyy-MM-dd HH:mm:ss')} ]]</td>
+        </tr>
+        <tr>
+            <th scope="row">내용</th>
+            <td colspan="4">[[ ${post.content} ]]</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<br/><br/>
+
+<form role="form" th:action="@{/post(id=${post.id})}" th:object="${commentsForm}" method="post">
+        <textarea th:if="${loginUser == null}"
+                  cols="60" rows="5" th:field="*{content}" style="margin-left: 30%"
+                  placeholder="댓글을 등록하려면 로그인이 필요합니다!"></textarea>
+    <textarea th:unless="${loginUser == null}"
+              cols="60" rows="5" th:field="*{content}" style="margin-left: 30%"
+              placeholder="댓글을 입력해보세요! (1자 이상)"></textarea>
+    <input th:if="not ${loginUser == null}" type="submit" value="등록"/>
+    <span th:if="${#fields.hasErrors('content')}">
+        <p th:if="${#fields.hasErrors('content')}" th:errorclass="error" th:errors="*{content}" style="color: crimson"/>
+    </span>
+    <hr>
+</form>
+
+<div th:if="${not #lists.isEmpty(post.commentsList)}" th:each="comments : ${post.commentsList}"
+     style="margin-left: 26%">
+    <div th:if="${editComments == null}">
+        <div>
+            <span style="font-size: small">[[ ${comments.writer.username} ]]</span>
+            <span th:if="${comments.modifier!=null}" style="font-size: small" th:text="|(수정자: ${comments.modifier.username})|"></span>
+            <p style="font-size: medium">[[ ${comments.content} ]]</p>
+            <span style="font-size: small">[[ ${#dates.format(comments.created_at, 'yyyy-MM-dd HH:mm:ss')} ]]</span>
+            <span th:if="${comments.modifier!=null}" style="font-size: small" th:text="|(수정일시: ${#dates.format(comments.modified_at, 'yyyy-MM-dd HH:mm:ss')})|"></span>
+        </div>
+        <div th:if="${loginUser != null}" style="margin-bottom: 15px">
+    <span th:if="${comments.writer.id == loginUser.id} or ${#strings.equals(loginUser.usertype, 'admin')}"
+          style="margin-left: 60%">
+        <a th:href="@{/post/comments/delete(id=${comments.id})}"> <button>삭제</button></a>
+        <a th:href="@{/post(id=${post.id}, cmt_id=${comments.id})}"> <button>수정</button></a><br/>
+    </span>
+        </div>
+    </div>
+    <div th:unless="${editComments == null}">
+        <div th:if="${editComments.id == comments.id}">
+            <p style="font-size: small">[[ ${comments.writer.username} ]]</p>
+            <form role="form" th:action="@{/post(id=${post.id}, cmt_id=${editComments.id})}" th:object="${commentsForm}"
+                  method="post">
+            <textarea cols="60" rows="5" th:field="*{content}"
+                      placeholder="수정할 댓글을 입력해보세요! (1자 이상)"></textarea>
+                <input th:if="not ${loginUser == null}" type="submit" value="수정"/>
+                <span th:if="${#fields.hasErrors('content')}">
+        <p th:if="${#fields.hasErrors('content')}" th:errorclass="error" th:errors="*{content}" style="color: crimson"/>
+    </span>
+            </form>
+        </div>
+        <div th:unless="${editComments.id == comments.id}">
+            <span style="font-size: small">[[ ${comments.writer.username} ]]</span>
+            <span th:if="${comments.modifier!=null}" style="font-size: small" th:text="|(수정자: ${comments.modifier.username})|"></span>
+            <p style="font-size: medium">[[ ${comments.content} ]]</p>
+            <span style="font-size: small">[[ ${#dates.format(comments.created_at, 'yyyy-MM-dd HH:mm:ss')} ]]</span>
+            <span th:if="${comments.modifier!=null}" style="font-size: small" th:text="|(수정일시: ${#dates.format(comments.modified_at, 'yyyy-MM-dd HH:mm:ss')})|"></span>
+        </div>
+        <div th:if="${loginUser != null}" style="margin-bottom: 15px">
+    <span th:if="${comments.writer.id == loginUser.id} or ${#strings.equals(loginUser.usertype, 'admin')}"
+          style="margin-left: 60%">
+    </span>
+        </div>
+    </div>
+</div>
+
+<div th:unless="${not #lists.isEmpty(post.commentsList)}" style="margin-left: 26%">
+    <p>댓글이 없습니다!</p>
+</div>
+</br>
+<button id="buttonHome" style="margin-left: 44.5%"><a href="/post">홈으로</a></button>
+</body>
+</html>

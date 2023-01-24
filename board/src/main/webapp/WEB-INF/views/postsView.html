@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<head xmlns="http://www.w3.org/1999/html">
+    <meta charset="UTF-8"/>
+    <title>MyBatisBoard</title>
+</head>
+<body>
+
+<h1>Board</h1>
+<div th:if="${loginUser==null}">
+    <a href="/login">
+        <button>로그인</button>
+    </a>
+</div>
+<div th:unless="${loginUser==null}">
+    <b><p th:text="|안녕하세요, ${loginUser.username}님!!|"/></b>
+    <a href="/post/register">
+        <button>글쓰기</button>
+    </a>
+    <a th:if="${#strings.equals(loginUser.usertype, 'admin')}" href="/post/restoration">
+        <button>삭제 글 복구</button>
+    </a>
+    <a href="/logout">
+        <button>로그아웃</button>
+    </a>
+</div>
+<br/>
+<table style="width: 800px">
+    <thead>
+    <tr>
+        <th scope="col">번호</th>
+        <th scope="col">제목</th>
+        <th scope="col">작성자</th>
+        <th scope="col">수정자</th>
+        <th scope="col">작성일시</th>
+        <th scope="col">댓글갯수</th>
+    </tr>
+    </thead>
+    <tbody style="text-align: center">
+    <tr th:if="${not #lists.isEmpty(postList)}" th:each="post, posts : ${postList}">
+        <td th:text="${posts.size - posts.index}"></td>
+        <td><a th:href="@{/post(id=${post.id})}" th:text="${post.title}"></a></td>
+        <td th:text="${post.writer.username}"></td>
+        <td th:if="${post.modifier == null}"> 없음</td>
+        <td th:unless="${post.modifier == null}"> [[ ${post.modifier.username} ]]</td>
+        <td th:text="${#dates.format(post.created_at, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        <td th:text="|${#lists.size(post.commentsList)}개|"></td>
+    </tr>
+
+    <tr th:unless="${not #lists.isEmpty( postList )}">
+        <td colspan="4" style="text-align: center">
+            <div>게시판이 비었습니다.</div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

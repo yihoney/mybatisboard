@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <title>로그인</title>
+</head>
+<body>
+    <form method="post" action="/login">
+        아이디: <input type="text" name="id" /><br />
+        패스워드: <input type="password" name="pwd" /><br />
+        <br />
+        <input type="submit"/>
+        <div th:if="not ${exceptionMessage==null}">
+        <hr>
+            <p th:text="${exceptionMessage}" style="color: crimson"></p>
+        </div>
+    </form>
+</body>
+</html>
